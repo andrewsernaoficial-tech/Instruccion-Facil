@@ -1,0 +1,248 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+body {
+    background: #f7f9fc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+body.dark-mode-active {
+    background: #0b0c0e;
+}
+
+.login-wrapper {
+    display: flex;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+    width: 100%;
+    max-width: 1100px;
+    height: 680px;
+    overflow: hidden;
+    border: 1px solid #eef1f6;
+}
+
+body.dark-mode-active .login-wrapper {
+    border-color: #1a1d26;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* El lado del logo se mantiene blanco en ambos modos para que no se note el cuadro de la imagen */
+.brand-side {
+    flex: 1.2;
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px;
+}
+
+body.dark-mode-active .brand-side {
+    background: #ffffff;
+}
+
+.brand-side img {
+    width: 100%;
+    max-width: 440px;
+    height: auto;
+    object-fit: contain;
+}
+
+/* El formulario maneja su propia transición de modo claro/oscuro independiente */
+.form-side {
+    flex: 1;
+    background: #ffffff; /* Modo Claro */
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-left: 1px solid #eef1f6;
+}
+
+body.dark-mode-active .form-side {
+    background: #14161d; /* Modo Oscuro */
+    border-left: 1px solid #22252e;
+}
+
+/* Textos adaptables */
+.form-side h2 {
+    margin-bottom: 8px;
+    color: #111111;
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+body.dark-mode-active .form-side h2 {
+    color: #ffffff;
+}
+
+.form-side p.subtitle {
+    color: #64748b;
+    margin-bottom: 40px;
+    font-size: 15px;
+}
+
+body.dark-mode-active .form-side p.subtitle {
+    color: #8a92a6;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #334155;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+body.dark-mode-active label {
+    color: #cbd5e1;
+}
+
+/* Inputs adaptables */
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+    background: #ffffff;
+    color: #111111;
+}
+
+body.dark-mode-active input[type="text"],
+body.dark-mode-active input[type="password"] {
+    background: #222631;
+    border-color: #2e3545;
+    color: #ffffff;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    border-color: #e6d800;
+    box-shadow: 0 0 0 4px rgba(230, 216, 0, 0.15);
+}
+
+/* Botón de envío principal */
+button.btn-submit {
+    width: 100%;
+    padding: 15px;
+    background: #fff000;
+    border: none;
+    color: #000000;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0 4px 12px rgba(255, 240, 0, 0.1);
+}
+
+button.btn-submit:hover {
+    background: #e6d800;
+}
+
+button.btn-submit:active {
+    transform: scale(0.99);
+}
+
+/* Botón flotante superior derecho */
+.theme-toggle {
+    position: fixed;
+    top: 25px;
+    right: 25px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+    padding: 10px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    z-index: 100;
+}
+
+body.dark-mode-active .theme-toggle {
+    background: #14161d;
+    border-color: #2c313d;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Alertas y enlaces */
+.alert {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    border: 1px solid #f5c6cb;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.links {
+    text-align: center;
+    margin-top: 35px;
+}
+
+.links p {
+    font-size: 14px;
+    color: #64748b;
+}
+
+body.dark-mode-active .links p {
+    color: #8a92a6;
+}
+
+.links a {
+    color: #b3a600;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+body.dark-mode-active .links a {
+    color: #fff000;
+}
+
+.links a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+    .login-wrapper {
+        flex-direction: column;
+        height: auto;
+        max-width: 480px;
+    }
+    .brand-side {
+        padding: 40px;
+    }
+    .brand-side img {
+        max-width: 260px;
+    }
+    .form-side {
+        padding: 40px;
+    }
+}

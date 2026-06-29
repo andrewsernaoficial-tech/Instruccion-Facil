@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro - Instrucción Fácil</title>
+    <link rel="stylesheet" th:href="@{/css/registro.css}">
+</head>
+<body>
+
+<button type="button" class="theme-toggle" id="themeBtn">Modo Oscuro</button>
+
+<div class="register-wrapper">
+
+    <div class="brand-side">
+        <img th:src="@{/images/logo.jpg}" alt="Logo Instrucción Fácil">
+    </div>
+
+    <div class="form-side">
+        <h2>Crea tu cuenta</h2>
+        <p class="subtitle">Selecciona tu perfil y completa tus datos profesionales</p>
+
+        <form th:action="@{/registro}" method="post" enctype="multipart/form-data">
+
+            <div class="role-selector">
+                <div class="role-option">
+                    <input type="radio" id="rolAlumno" name="rol" value="ALUMNO" checked required>
+                    <label for="rolAlumno">Soy Alumno</label>
+                </div>
+                <div class="role-option">
+                    <input type="radio" id="rolProfesor" name="rol" value="PROFESOR">
+                    <label for="rolProfesor">Soy Profesor</label>
+                </div>
+            </div>
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label class="field-label" for="nombre">Nombre</label>
+                    <input type="text" id="nombre" name="nombre" required placeholder="Tu nombre">
+                </div>
+
+                <div class="form-group">
+                    <label class="field-label" for="apellido">Apellidos</label>
+                    <input type="text" id="apellido" name="apellido" required placeholder="Tus apellidos">
+                </div>
+
+                <div class="form-group">
+                    <label class="field-label" for="nombreUsuario">Nombre de Usuario</label>
+                    <input type="text" id="nombreUsuario" name="nombreUsuario" required placeholder="Ej: andrew95">
+                </div>
+
+                <div class="form-group">
+                    <label class="field-label" for="telefono">Número de Teléfono</label>
+                    <input type="text" id="telefono" name="telefono" required placeholder="Ej: 987654321">
+                </div>
+
+                <div class="form-group">
+                    <label class="field-label" for="correo">Correo Electrónico</label>
+                    <input type="email" id="correo" name="correo" required placeholder="correo@ejemplo.com">
+                </div>
+
+                <div class="form-group">
+                    <label class="field-label" for="contrasena">Contraseña</label>
+                    <input type="password" id="contrasena" name="contrasena" required placeholder="********">
+                </div>
+
+                <div class="form-group full-width">
+                    <label class="field-label" for="fotoPerfil">Foto de Perfil</label>
+                    <input type="file" id="fotoPerfil" name="fotoPerfil" accept="image/*">
+                </div>
+
+                <div id="seccionProfesor" class="conditional-section">
+                    <div class="form-grid">
+
+                        <div class="form-group full-width">
+                            <label class="field-label" for="licenciaProfesional">Licencia Profesional</label>
+                            <input type="text" id="licenciaProfesional" name="licenciaProfesional" placeholder="N° de Licencia">
+                        </div>
+
+                        <div class="car-question">
+                            <label class="field-label">¿Dispone de vehículo propio de la academia actualmente?</label>
+                            <div class="radio-group">
+                                <label class="radio-inline">
+                                    <input type="radio" name="tieneCarro" value="si"> Sí
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="tieneCarro" value="no" checked> No
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="camposVehiculo" class="conditional-section" style="border:none; padding:0; margin:0;">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="field-label" for="placa">Placa del Vehículo</label>
+                                    <input type="text" id="placa" name="placa" placeholder="Ej: ABC-123">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="field-label" for="modelo">Modelo de Carro</label>
+                                    <input type="text" id="modelo" name="modelo" placeholder="Ej: Toyota Yaris">
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label class="field-label" for="soat">Documento SOAT (Imagen/PDF)</label>
+                                    <input type="file" id="soat" name="soat">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <button type="submit" class="btn-submit">Registrarse</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="links">
+            <p>¿Ya tienes una cuenta? <a th:href="@{/login}">Inicia sesión aquí</a></p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const themeBtn = document.getElementById('themeBtn');
+    const body = document.body;
+
+    if (localStorage.getItem('theme') === 'dark') {
+        body.classList.add('dark-mode-active');
+        themeBtn.textContent = 'Modo Claro';
+    }
+
+    themeBtn.addEventListener('click', () => {
+        body.classList.toggle('dark-mode-active');
+        if (body.classList.contains('dark-mode-active')) {
+            themeBtn.textContent = 'Modo Claro';
+            localStorage.setItem('theme', 'dark');
+        } else {
+            themeBtn.textContent = 'Modo Oscuro';
+            localStorage.setItem('theme', 'light');
+        }
+    });
+
+    const rolAlumno = document.getElementById('rolAlumno');
+    const rolProfesor = document.getElementById('rolProfesor');
+    const seccionProfesor = document.getElementById('seccionProfesor');
+    const camposVehiculo = document.getElementById('camposVehiculo');
+    const opcionesCarro = document.getElementsByName('tieneCarro');
+
+    function toggleFields() {
+        if (rolProfesor.checked) {
+            seccionProfesor.style.display = 'grid';
+            document.getElementById('licenciaProfesional').required = true;
+            toggleCarFields();
+        } else {
+            seccionProfesor.style.display = 'none';
+            document.getElementById('licenciaProfesional').required = false;
+            setCarFieldsRequired(false);
+        }
+    }
+
+    function toggleCarFields() {
+        const tieneCarro = document.querySelector('input[name="tieneCarro"]:checked').value;
+        if (tieneCarro === 'si' && rolProfesor.checked) {
+            camposVehiculo.style.display = 'grid';
+            setCarFieldsRequired(true);
+        } else {
+            camposVehiculo.style.display = 'none';
+            setCarFieldsRequired(false);
+        }
+    }
+
+    function setCarFieldsRequired(value) {
+        document.getElementById('placa').required = value;
+        document.getElementById('modelo').required = value;
+    }
+
+    rolAlumno.addEventListener('change', toggleFields);
+    rolProfesor.addEventListener('change', toggleFields);
+    opcionesCarro.forEach(radio => radio.addEventListener('change', toggleCarFields));
+</script>
+
+</body>
+</html>

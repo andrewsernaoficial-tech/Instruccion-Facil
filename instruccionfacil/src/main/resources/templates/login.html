@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Iniciar Sesión - Instrucción Fácil</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<button type="button" class="theme-toggle" id="themeBtn">Modo Oscuro</button>
+
+<div class="login-wrapper">
+
+    <div class="brand-side">
+        <img th:src="@{/images/logo.jpg}" alt="Logo Instrucción Fácil">
+    </div>
+
+    <div class="form-side">
+        <h2>Bienvenido</h2>
+        <p class="subtitle">Ingresa tus credenciales para acceder al portal</p>
+
+        <div th:if="${param.registroExitoso}" class="alert alert-success">
+            ¡Registro completado! Ya puedes iniciar sesión.
+        </div>
+
+        <div th:if="${param.esperaAprobacion}" class="alert alert-success">
+            Registro enviado. Tu cuenta será activada al ser aprobada.
+        </div>
+
+        <div th:if="${error}" class="alert" th:text="${error}"></div>
+
+        <form th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label for="loginInput">Correo o Nombre de Usuario</label>
+                <input type="text" id="loginInput" name="loginInput" required placeholder="ejemplo@correo.com">
+            </div>
+
+            <div class="form-group">
+                <label for="contrasena">Contraseña</label>
+                <input type="password" id="contrasena" name="contrasena" required placeholder="********">
+            </div>
+
+            <button type="submit" class="btn-submit">Ingresar</button>
+        </form>
+
+        <div class="links">
+            <p>¿No tienes una cuenta? <a th:href="@{/registro}">Regístrate aquí</a></p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const themeBtn = document.getElementById('themeBtn');
+    const body = document.body;
+
+    if (localStorage.getItem('theme') === 'dark') {
+        body.classList.add('dark-mode-active');
+        themeBtn.textContent = 'Modo Claro';
+    }
+
+    themeBtn.addEventListener('click', () => {
+        body.classList.toggle('dark-mode-active');
+
+        if (body.classList.contains('dark-mode-active')) {
+            themeBtn.textContent = 'Modo Claro';
+            localStorage.setItem('theme', 'dark');
+        } else {
+            themeBtn.textContent = 'Modo Oscuro';
+            localStorage.setItem('theme', 'light');
+        }
+    });
+</script>
+
+</body>
+</html>

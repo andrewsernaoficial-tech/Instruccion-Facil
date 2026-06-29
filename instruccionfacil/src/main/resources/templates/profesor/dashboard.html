@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Instructor | Instrucción Fácil</title>
+    <link rel="stylesheet" th:href="@{/css/profesor_dashboard.css}">
+</head>
+<body>
+
+<div class="sidebar">
+    <div>
+        <div class="logo-section">INSTRUCCIÓN FÁCIL</div>
+        <div style="text-align: center; padding: 20px 0;">
+            <img th:src="@{'/usuario/foto/' + ${perfil['ID_USUARIO']}}"
+                 onerror="this.onerror=null; this.src='/images/default-avatar.png';"
+                 alt="Foto de perfil"
+                 style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 2px solid #292524;">
+        </div>
+        <div class="nav-menu">
+            <button class="nav-btn active" onclick="switchTab('solicitudes', this)">📥 Solicitudes Activas</button>
+            <button class="nav-btn" onclick="switchTab('historial', this)">📜 Historial de Clases</button>
+            <button class="nav-btn" onclick="switchTab('perfil', this)">👤 Mi Perfil</button>
+        </div>
+    </div>
+    <div style="padding: 20px; border-top: 1px solid #292524;">
+        <a th:href="@{/logout}" style="color: #ef4444; text-decoration: none; font-size: 14px;">🚪 Salir del Sistema</a>
+    </div>
+</div>
+
+<div class="main-container">
+
+    <header>
+        <div>
+            <h1 th:text="'Prof. ' + ${perfil['NOMBRE']} + ' ' + ${perfil['APELLIDO']}">Instructor</h1>
+            <p style="margin: 4px 0 0 0; color: #78716c;">Gestiona tus horarios, asigna precios y reporta el progreso de tus alumnos.</p>
+        </div>
+        <div>
+            <form th:action="@{/profesor/disponibilidad}" method="post" style="display: flex; align-items: center; gap: 15px;">
+                <input type="hidden" name="idUsuario" th:value="${perfil['ID_USUARIO']}">
+
+                <div class="status-indicator">
+                    <span class="dot" th:classappend="${perfil['DISPONIBILIDAD'] == 'DISPONIBLE' ? 'active' : 'inactive'}"></span>
+                    <span th:text="${perfil['DISPONIBILIDAD'] == 'DISPONIBLE' ? 'Disponible para Clases' : 'No Disponible'}">Estado</span>
+                </div>
+
+                <input type="hidden" name="nuevoEstado" th:value="${perfil['DISPONIBILIDAD'] == 'DISPONIBLE' ? 'NO_DISPONIBLE' : 'DISPONIBLE'}">
+                <button type="submit" class="btn" th:text="${perfil['DISPONIBILIDAD'] == 'DISPONIBLE' ? 'Pausar Disponibilidad' : 'Ponerme Disponible'}">Cambiar</button>
+            </form>
+        </div>
+    </header>
+
+    <div id="view-solicitudes" class="instructor-view active">
+        <h2>Solicitudes y Clases en Curso</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Alumno</th>
+                    <th>Fecha Programada</th>
+                    <th>Precio Asignado</th>
+                    <th>Boleta Adjunta</th>
+                    <th>Acciones de Gestión</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="sol : ${solicitudes}">
+                    <td th:text="${sol['ID_RESERVA']}"></td>
+                    <td th:text="${sol['ALUMNO']}"></td>
+                    <td th:text="${sol['FECHA']}"></td>
+                    <td th:text="${sol['PRECIO'] > 0 ? 'S/ ' + sol['PRECIO'] : 'Sin asignar'}"></td>
+                    <td>
+                        <span th:if="${sol['TIENE_BOLETA'] > 0}" style="color: #16a34a; font-weight: bold;">✅ Sí Adjunta</span>
+                        <span th:if="${sol['TIENE_BOLETA'] == 0 or sol['TIENE_BOLETA'] == null}" style="color: #dc2626;">❌ No subida</span>
+                    </td>
+                    <td>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <div th:if="${sol['PRECIO'] == 0}">
+                                <form th:action="@{/profesor/clase/establecer-precio}" method="post" style="display: flex; gap: 5px;">
+                                    <input type="hidden" name="idReserva" th:value="${sol['ID_RESERVA']}">
+                                    <input type="number" step="0.01" name="precio" placeholder="Precio S/" required style="max-width: 90px; padding: 4px;">
+                                    <button type="submit" class="btn btn-action" style="font-size: 12px; padding: 4px 8px;">Asignar S/</button>
+                                </form>
+                            </div>
+
+                            <div th:if="${sol['PRECIO'] > 0}">
+                                <form th:action="@{/profesor/clase/finalizar}" method="post" style="display: flex; flex-direction: column; gap: 4px;">
+                                    <input type="hidden" name="idReserva" th:value="${sol['ID_RESERVA']}">
+                                    <textarea name="reporte" placeholder="Escribe aquí el reporte de avance del alumno..." required style="width: 100%; min-height: 40px; padding: 4px; font-size: 12px; border-radius: 4px; border: 1px solid #ccc;"></textarea>
+                                    <button type="submit" class="btn" style="background-color: #16a34a; font-size: 12px; padding: 4px 8px;">Finalizar Clase</button>
+                                </form>
+                            </div>
+
+                            <form th:action="@{/profesor/clase/cancelar}" method="post">
+                                <input type="hidden" name="idReserva" th:value="${sol['ID_RESERVA']}">
+                                <button type="submit" class="btn btn-danger" style="font-size: 11px; padding: 2px 6px;">Cancelar Clase</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(solicitudes)}">
+                    <td colspan="6" style="text-align: center; color: #a8a29e; padding: 30px;">No hay solicitudes pendientes o en curso.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="view-historial" class="instructor-view">
+        <h2>Historial de Clases Culminadas / Canceladas</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Alumno</th>
+                    <th>Fecha</th>
+                    <th>Precio Cobrado</th>
+                    <th>Estado</th>
+                    <th>Reporte Emitido</th>
+                    <th>Calificación Recibida</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="hist : ${clasesHistorial}">
+                    <td th:text="${hist['ID_RESERVA']}"></td>
+                    <td th:text="${hist['ALUMNO']}"></td>
+                    <td th:text="${hist['FECHA']}"></td>
+                    <td th:text="'S/ ' + ${hist['PRECIO']}"></td>
+                    <td th:text="${hist['ESTADO_CLASE']}"></td>
+                    <td th:text="${hist['REPORTE_AVANCE'] != null ? hist['REPORTE_AVANCE'] : '-'}"></td>
+                    <td>
+                        <span th:if="${hist['CALIFICACION_ESTRELLAS'] != null}" th:text="${hist['CALIFICACION_ESTRELLAS']} + ' ⭐'" style="color: #eab308; font-weight: bold;"></span>
+                        <span th:if="${hist['CALIFICACION_ESTRELLAS'] == null and hist['ESTADO_CLASE'] == 'COMPLETADA'}" style="color: #78716c; font-style: italic;">Pendiente</span>
+                        <span th:if="${hist['ESTADO_CLASE'] == 'CANCELADA'}">-</span>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(clasesHistorial)}">
+                    <td colspan="7" style="text-align: center; color: #a8a29e; padding: 30px;">No registras antecedentes en tu historial.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="view-perfil" class="instructor-view">
+        <h2>Editar Datos del Perfil</h2>
+        <div class="profile-card">
+            <form th:action="@{/profesor/perfil/editar}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="idUsuario" th:value="${perfil['ID_USUARIO']}">
+
+                <div class="form-group">
+                    <label>Nombre de Usuario (Login)</label>
+                    <input type="text" th:value="${perfil['NOMBRE_USUARIO']}" disabled style="background-color: #f5f5f4; color: #78716c;">
+                </div>
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" name="nombre" th:value="${perfil['NOMBRE']}" required>
+                </div>
+                <div class="form-group">
+                    <label>Apellido</label>
+                    <input type="text" name="apellido" th:value="${perfil['APELLIDO']}" required>
+                </div>
+                <div class="form-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" name="correo" th:value="${perfil['CORREO']}" required>
+                </div>
+                <div class="form-group">
+                    <label>Cambiar Foto de Perfil</label>
+                    <input type="file" name="foto" accept="image/png, image/jpeg, image/jpg" style="padding: 8px 0;">
+                </div>
+
+                <button type="submit" class="btn btn-action" style="padding: 12px 24px;">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function switchTab(tabId, element) {
+        document.querySelectorAll('.instructor-view').forEach(view => view.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+        document.getElementById('view-' + tabId).classList.add('active');
+        if (element) element.classList.add('active');
+    }
+</script>
+</body>
+</html>

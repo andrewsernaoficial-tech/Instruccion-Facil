@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Alumno | Instrucción Fácil</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            background-color: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: #1e293b;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .logo-section {
+            padding: 24px;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-align: center;
+            border-bottom: 1px solid #334155;
+            background-color: #0f172a;
+        }
+
+        .nav-menu {
+            padding: 20px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 14px 16px;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-btn:hover {
+            background-color: #334155;
+            color: #f8fafc;
+        }
+
+        .nav-btn.active {
+            background-color: #facc15;
+            color: #0f172a;
+        }
+
+        .main-container {
+            margin-left: 260px;
+            width: calc(100% - 260px);
+            padding: 40px;
+        }
+
+        header {
+            margin-bottom: 32px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            color: #0f172a;
+        }
+
+        .instructor-view {
+            display: none;
+        }
+
+        .instructor-view.active {
+            display: block;
+        }
+
+        h2 {
+            font-size: 20px;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        .table-wrapper {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: #475569;
+            padding: 16px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .btn {
+            background-color: #0f172a;
+            color: #ffffff;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #1e293b;
+        }
+
+        .status-tag {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+        }
+        .status-tag.programada { background-color: #dbeafe; color: #1e40af; }
+        .status-tag.completada { background-color: #dcfce7; color: #166534; }
+        .status-tag.cancelada { background-color: #fee2e2; color: #991b1b; }
+
+        .profile-card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 30px;
+            max-width: 600px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #1e293b;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: #0f172a;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div>
+        <div class="logo-section">
+            INSTRUCCIÓN FÁCIL
+        </div>
+        <div style="text-align: center; padding: 20px 0;">
+            <img th:src="@{/images/logo.jpg}" alt="Logo" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #334155;">
+        </div>
+        <div class="nav-menu">
+            <button class="nav-btn active" onclick="switchView('solicitarClaseTab', this)">
+                Solicitar Clase
+            </button>
+            <button class="nav-btn" onclick="switchView('misClasesTab', this)">
+                Mis Clases y Pagos
+            </button>
+            <button class="nav-btn" onclick="switchView('miPerfilTab', this)">
+                Mi Perfil
+            </button>
+        </div>
+    </div>
+
+    <div style="padding: 24px 12px;">
+        <a th:href="@{/login}" class="nav-btn" style="color: #ef4444; text-decoration: none; justify-content: center; background-color: #27272a;">Salir del Sistema</a>
+    </div>
+</div>
+
+<div class="main-container">
+
+    <header th:if="${alumnoPerfil != null}">
+        <h1 th:text="'Hola, ' + ${alumnoPerfil['NOMBRE'] ?: 'Alumno'} + ' ' + ${alumnoPerfil['APELLIDO'] ?: ''}">Hola, Alumno</h1>
+        <p style="color: #64748b; margin-top: 5px; font-size: 15px;">Gestiona tus clases de conducción y revisa tus avances en tiempo real.</p>
+    </header>
+
+    <div id="solicitarClaseTab" class="instructor-view active">
+        <h2>Instructores Disponibles</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Instructor</th>
+                    <th>Vehículo Asignado / Placa</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="profesor : ${profesoresDisponibles}">
+                    <td style="font-weight: 600;" th:text="${profesor['NOMBRE']} + ' ' + ${profesor['APELLIDO']}">Nombre Instructor</td>
+                    <td th:text="${profesor['MODELO_CARRO'] != null ? profesor['MODELO_CARRO'] + ' - ' + profesor['PLACA'] : 'No asignado'}">Vehículo</td>
+                    <td>
+                        <div style="display: flex; gap: 10px;">
+                            <form th:action="@{/alumno/solicitar-ya}" method="post">
+                                <input type="hidden" name="idProfesor" th:value="${profesor['ID_USUARIO']}">
+                                <button type="submit" class="btn" style="background-color: #16a34a;">Solicitar Ya</button>
+                            </form>
+                            <form th:action="@{/alumno/reservar}" method="post" style="display: flex; align-items: center; gap: 5px;">
+                                <input type="hidden" name="idProfesor" th:value="${profesor['ID_USUARIO']}">
+                                <input type="datetime-local" name="fechaReserva" required style="padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                                <button type="submit" class="btn" style="background-color: #2563eb;">Agendar Fecha</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(profesoresDisponibles)}">
+                    <td colspan="3" style="text-align: center; color: #64748b; padding: 30px;">No hay instructores disponibles por el momento.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="misClasesTab" class="instructor-view">
+        <h2>Estado de tus Solicitudes y Clases</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Instructor</th>
+                    <th>Fecha / Hora</th>
+                    <th>Precio</th>
+                    <th>Estado</th>
+                    <th>Acciones / Avance</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="reserva : ${reservas}">
+                    <td th:text="${reserva['ID_RESERVA']}">1</td>
+                    <td th:text="${reserva['PROFESOR']}">Instructor</td>
+                    <td th:text="${reserva['FECHA']}">2026-06-29 18:00</td>
+                    <td style="font-weight: 600;" th:text="${reserva['PRECIO'] > 0 ? 'S/ ' + reserva['PRECIO'] : 'Pendiente'}">S/ 0.0</td>
+                    <td>
+                        <span th:text="${reserva['ESTADO_CLASE']}" th:class="'status-tag ' + ${#strings.toLowerCase(reserva['ESTADO_CLASE'])}">ESTADO</span>
+                    </td>
+                    <td>
+                        <div th:if="${reserva['ESTADO_CLASE'] == 'PROGRAMADA' and reserva['PRECIO'] > 0}">
+                            <form th:action="@{/alumno/pagar}" method="post" enctype="multipart/form-data" style="display: flex; gap: 5px; align-items: center;">
+                                <input type="hidden" name="idReserva" th:value="${reserva['ID_RESERVA']}">
+                                <input type="file" name="boleta" accept="image/*,application/pdf" required style="font-size: 12px; max-width: 150px;">
+                                <button type="submit" class="btn" style="background-color: #16a34a; padding: 8px 12px;">Subir Boleta</button>
+                            </form>
+                        </div>
+                        <div th:if="${reserva['ESTADO_CLASE'] == 'PROGRAMADA' and reserva['PRECIO'] == 0}">
+                            <span style="color: #ca8a04; font-size: 13px; font-weight: 500;">⏳ Esperando que el administrador asigne el precio</span>
+                        </div>
+                        <div th:if="${reserva['ESTADO_CLASE'] == 'COMPLETADA'}" style="background-color: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <p style="font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase;">Reporte del Instructor:</p>
+                            <p th:text="${reserva['REPORTE_AVANCE'] ?: 'Sin observaciones registradas todavía'}" style="font-style: italic; color: #1e293b; margin: 4px 0 8px 0; font-size: 13px;">Ninguno</p>
+
+                            <div th:if="${reserva['CALIFICACION_ESTRELLAS'] != null}" style="font-size: 13px; font-weight: 600;">
+                                Tu calificación: <span th:text="${reserva['CALIFICACION_ESTRELLAS']}" style="color: #facc15;">0</span> ⭐
+                            </div>
+
+                            <form th:if="${reserva['CALIFICACION_ESTRELLAS'] == null}" th:action="@{/alumno/calificar}" method="post" style="margin-top: 5px; display: flex; gap: 5px;">
+                                <input type="hidden" name="idReserva" th:value="${reserva['ID_RESERVA']}">
+                                <select name="estrellas" required style="padding: 6px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 12px; width: auto;">
+                                    <option value="5">5 ⭐ (Excelente)</option>
+                                    <option value="4">4 ⭐ (Bueno)</option>
+                                    <option value="3">3 ⭐ (Regular)</option>
+                                    <option value="2">2 ⭐ (Malo)</option>
+                                    <option value="1">1 ⭐ (Pésimo)</option>
+                                </select>
+                                <button type="submit" class="btn" style="padding: 6px 12px; font-size: 12px; background-color: #f59e0b;">Calificar</button>
+                            </form>
+                        </div>
+                        <div th:if="${reserva['ESTADO_CLASE'] == 'CANCELADA'}">
+                            <span style="color: #dc2626; font-size: 13px; font-weight: 500;">❌ Clase Cancelada</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(reservas)}">
+                    <td colspan="6" style="text-align: center; color: #64748b; padding: 30px;">Aún no cuentas con registros de clases.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="miPerfilTab" class="instructor-view">
+        <h2>Editar Datos del Perfil</h2>
+        <div class="profile-card" th:if="${alumnoPerfil != null}">
+            <form th:action="@{/alumno/perfil/guardar}" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Nombre de Usuario</label>
+                    <input type="text" th:value="${alumnoPerfil['NOMBRE_USUARIO']}" disabled style="background-color: #e2e8f0; color: #64748b; cursor: not-allowed;">
+                </div>
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" name="nombre" th:value="${alumnoPerfil['NOMBRE']}" required>
+                </div>
+                <div class="form-group">
+                    <label>Apellido</label>
+                    <input type="text" name="apellido" th:value="${alumnoPerfil['APELLIDO']}" required>
+                </div>
+                <div class="form-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" th:value="${alumnoPerfil['CORREO']}" disabled style="background-color: #e2e8f0; color: #64748b; cursor: not-allowed;">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="text" name="telefono" th:value="${alumnoPerfil['TELEFONO']}" required>
+                </div>
+                <div class="form-group">
+                    <label>Nueva Contraseña (Dejar en blanco para mantener la actual)</label>
+                    <input type="password" name="contrasena" placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                    <label>Foto de Perfil</label>
+                    <input type="file" name="fotoPerfil" accept="image/*" style="border: none; padding-left: 0;">
+                </div>
+                <button type="submit" class="btn" style="width: 100%; padding: 12px; margin-top: 10px; background-color: #2563eb;">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function switchView(tabId, button) {
+        document.querySelectorAll('.instructor-view').forEach(view => {
+            view.classList.remove('active');
+        });
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        document.getElementById(tabId).classList.add('active');
+        button.classList.add('active');
+    }
+</script>
+</body>
+</html>

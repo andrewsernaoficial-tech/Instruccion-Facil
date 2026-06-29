@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Administrador | Instrucción Fácil</title>
+    <link rel="stylesheet" th:href="@{/css/admin_dashboard.css}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-wrapper {
+            background: #ffffff;
+            padding: 35px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.open .modal-wrapper {
+            transform: translateY(0);
+        }
+        .modal-wrapper h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #0f172a;
+        }
+        .modal-form-group {
+            margin-bottom: 18px;
+        }
+        .modal-form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+        .modal-form-group input, .modal-form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+            color: #334155;
+            background: #f8fafc;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .modal-form-group input:focus, .modal-form-group select:focus {
+            border-color: #0f172a;
+            background: #ffffff;
+        }
+        .modal-footer-btns {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 25px;
+        }
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #475569;
+        }
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+        .action-header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .btn-create-main {
+            background: #10b981;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-create-main:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div>
+        <div class="logo">
+            <img th:src="@{/images/logo.jpg}" alt="Logo">
+        </div>
+        <div class="menu-nav">
+            <button class="menu-btn active" onclick="switchView('resumen', this)">
+                📊 Vista General
+            </button>
+            <button class="menu-btn" onclick="switchView('usuarios', this)">
+                👥 Gestionar Cuentas
+            </button>
+            <button class="menu-btn" onclick="switchView('flota', this)">
+                🚗 Flota Vehicular
+            </button>
+            <button class="menu-btn" onclick="switchView('solicitudes', this)">
+                🔏 Solicitudes Profesor
+            </button>
+        </div>
+    </div>
+    <div class="logout-box">
+        <a th:href="@{/logout}" class="logout-btn">
+            🚪 Cerrar Sesión
+        </a>
+    </div>
+</div>
+
+<div class="main-content">
+
+    <div id="view-resumen" class="dashboard-view active">
+        <header>
+            <h1>Panel de Control Global</h1>
+            <p>Monitoreo en tiempo real del rendimiento económico, alumnos registrados e instructores activos.</p>
+        </header>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h3>Ganancias Totales</h3>
+                <div class="value" th:text="'S/ ' + ${metrics['GANANCIAS_TOTALES']}">S/ 0.00</div>
+            </div>
+            <div class="metric-card">
+                <h3>Total Cuentas</h3>
+                <div class="value" th:text="${metrics['TOTAL_USUARIOS']}">0</div>
+            </div>
+            <div class="metric-card">
+                <h3>Alumnos Matriculados</h3>
+                <div class="value" th:text="${metrics['TOTAL_ALUMNOS']}">0</div>
+            </div>
+            <div class="metric-card">
+                <h3>Profesores</h3>
+                <div class="value" th:text="${metrics['TOTAL_PROFESORES']}">0</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+
+    <div id="view-usuarios" class="dashboard-view">
+        <header>
+            <h1>Gestión Total de Usuarios</h1>
+            <p>Visualiza y administra de forma integral a todos los alumnos y credenciales del sistema.</p>
+        </header>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Correo</th>
+                    <th>Rol asignado</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${usuarios}">
+                    <td th:text="${user['ID_USUARIO']}"></td>
+                    <td th:text="${user['NOMBRE_USUARIO']}"></td>
+                    <td th:text="${user['CORREO']}"></td>
+                    <td th:text="${user['ROL']}"></td>
+                    <td>
+                        <div class="actions-cell">
+                            <button type="button" class="btn-table btn-approve"
+                                    th:data-id="${user['ID_USUARIO']}"
+                                    th:data-username="${user['NOMBRE_USUARIO']}"
+                                    th:data-email="${user['CORREO']}"
+                                    th:data-role="${user['ROL']}"
+                                    onclick="openEditModal(this)">
+                                Editar
+                            </button>
+                            <form th:action="@{/admin/usuario/eliminar}" method="post" style="display:inline;" onsubmit="return confirm('¿Estás seguro de eliminar este usuario?');">
+                                <input type="hidden" name="idUsuario" th:value="${user['ID_USUARIO']}">
+                                <button type="submit" class="btn-table btn-reject">Eliminar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="view-flota" class="dashboard-view">
+        <div class="action-header-container">
+            <header style="margin-bottom: 0;">
+                <h1>Control de Flota Vehicular</h1>
+                <p>Administra los automóviles asignados a las prácticas de conducción de la academia.</p>
+            </header>
+            <button type="button" class="btn-create-main" onclick="openCreateVehicleModal()">+ Agregar Vehículo</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Placa</th>
+                    <th>Modelo</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="veh : ${flota}">
+                    <td th:text="${veh['ID_VEHICULO']}"></td>
+                    <td th:text="${veh['PLACA']}"></td>
+                    <td th:text="${veh['MODELO']}"></td>
+                    <td th:text="${veh['ESTADO']}"></td>
+                    <td>
+                        <div class="actions-cell">
+                            <button type="button" class="btn-table btn-approve"
+                                    th:data-id="${veh['ID_VEHICULO']}"
+                                    th:data-placa="${veh['PLACA']}"
+                                    th:data-modelo="${veh['MODELO']}"
+                                    th:data-estado="${veh['ESTADO']}"
+                                    onclick="openEditVehicleModal(this)">
+                                Editar
+                            </button>
+                            <form th:action="@{/admin/vehiculo/eliminar}" method="post" style="display:inline;" onsubmit="return confirm('¿Estás seguro de eliminar este vehículo?');">
+                                <input type="hidden" name="idVehiculo" th:value="${veh['ID_VEHICULO']}">
+                                <button type="submit" class="btn-table btn-reject">Eliminar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="view-solicitudes" class="dashboard-view">
+        <header>
+            <h1>Aprobación de Instructores</h1>
+            <p>Evalúa las solicitudes pendientes de profesores antes de permitir su ingreso a las rutas prácticas.</p>
+        </header>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>Instructor</th>
+                    <th>Correo</th>
+                    <th>Estado Actual</th>
+                    <th>Acciones de Verificación</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="sol : ${solicitudes}">
+                    <td th:text="${sol['NOMBRE']} + ' ' + ${sol['APELLIDO']}"></td>
+                    <td th:text="${sol['CORREO']}"></td>
+                    <td>
+                        <span th:if="${sol['ESTADO_APROBACION'] == 'PENDIENTE'}" class="badge pending">PENDIENTE</span>
+                        <span th:if="${sol['ESTADO_APROBACION'] == 'APROBADO'}" class="badge approved">APROBADO</span>
+                        <span th:if="${sol['ESTADO_APROBACION'] == 'RECHAZADO'}" class="badge rejected">RECHAZADO</span>
+                    </td>
+                    <td>
+                        <div class="actions-cell" th:if="${sol['ESTADO_APROBACION'] == 'PENDIENTE'}">
+                            <form th:action="@{/admin/profesor/aprobar}" method="post" style="display:inline;">
+                                <input type="hidden" name="idUsuario" th:value="${sol['ID_USUARIO']}">
+                                <button type="submit" class="btn-table btn-approve">Aprobar</button>
+                            </form>
+                            <form th:action="@{/admin/profesor/rechazar}" method="post" style="display:inline;">
+                                <input type="hidden" name="idUsuario" th:value="${sol['ID_USUARIO']}">
+                                <button type="submit" class="btn-table btn-reject">Rechazar</button>
+                            </form>
+                        </div>
+                        <span th:if="${sol['ESTADO_APROBACION'] != 'PENDIENTE'}" style="color: #94a3b8; font-size: 13px;">Sin acciones requeridas</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal-overlay" id="editUserModal">
+    <div class="modal-wrapper">
+        <h2>Modificar Datos de Cuenta</h2>
+        <form th:action="@{/admin/usuario/editar}" method="post">
+            <input type="hidden" name="idUsuario" id="edit_idUsuario">
+            <div class="modal-form-group">
+                <label>Nombre de Usuario</label>
+                <input type="text" name="nombreUsuario" id="edit_nombreUsuario" required>
+            </div>
+            <div class="modal-form-group">
+                <label>Correo Electrónico</label>
+                <input type="email" name="correo" id="edit_correo" required>
+            </div>
+            <div class="modal-form-group">
+                <label>Rol del Sistema</label>
+                <select name="rol" id="edit_rol" required>
+                    <option value="ALUMNO">ALUMNO</option>
+                    <option value="PROFESOR">PROFESOR</option>
+                </select>
+            </div>
+            <div class="modal-footer-btns">
+                <button type="button" class="btn-table btn-secondary" onclick="closeEditModal()">Cancelar</button>
+                <button type="submit" class="btn-table btn-approve">Actualizar Cuenta</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="createVehicleModal">
+    <div class="modal-wrapper">
+        <h2>Registrar Nuevo Vehículo</h2>
+        <form th:action="@{/admin/vehiculo/crear}" method="post">
+            <div class="modal-form-group">
+                <label>Placa</label>
+                <input type="text" name="placa" required placeholder="Ej: ABC-123">
+            </div>
+            <div class="modal-form-group">
+                <label>Modelo</label>
+                <input type="text" name="modelo" required placeholder="Ej: Yaris">
+            </div>
+            <div class="modal-form-group">
+                <label>Estado Inicial</label>
+                <select name="estado" required>
+                    <option value="DISPONIBLE">DISPONIBLE</option>
+                    <option value="MANTENIMIENTO">MANTENIMIENTO</option>
+                    <option value="OCUPADO">OCUPADO</option>
+                </select>
+            </div>
+            <div class="modal-footer-btns">
+                <button type="button" class="btn-table btn-secondary" onclick="closeCreateVehicleModal()">Cancelar</button>
+                <button type="submit" class="btn-table btn-approve">Guardar Vehículo</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="editVehicleModal">
+    <div class="modal-wrapper">
+        <h2>Modificar Vehículo</h2>
+        <form th:action="@{/admin/vehiculo/editar}" method="post">
+            <input type="hidden" name="idVehiculo" id="edit_idVehiculo">
+            <div class="modal-form-group">
+                <label>Placa</label>
+                <input type="text" name="placa" id="edit_vehPlaca" required>
+            </div>
+            <div class="modal-form-group">
+                <label>Modelo</label>
+                <input type="text" name="modelo" id="edit_vehModelo" required>
+            </div>
+            <div class="modal-form-group">
+                <label>Estado Operacional</label>
+                <select name="estado" id="edit_vehEstado" required>
+                    <option value="DISPONIBLE">DISPONIBLE</option>
+                    <option value="MANTENIMIENTO">MANTENIMIENTO</option>
+                    <option value="OCUPADO">OCUPADO</option>
+                </select>
+            </div>
+            <div class="modal-footer-btns">
+                <button type="button" class="btn-table btn-secondary" onclick="closeEditVehicleModal()">Cancelar</button>
+                <button type="submit" class="btn-table btn-approve">Actualizar Vehículo</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function switchView(viewName, element) {
+        document.querySelectorAll('.dashboard-view').forEach(view => view.classList.remove('active'));
+        document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+
+        document.getElementById('view-' + viewName).classList.add('active');
+        if(element) {
+            element.classList.add('active');
+        }
+    }
+
+    function openEditModal(button) {
+        const id = button.getAttribute('data-id');
+        const username = button.getAttribute('data-username');
+        const email = button.getAttribute('data-email');
+        const role = button.getAttribute('data-role');
+
+        document.getElementById('edit_idUsuario').value = id;
+        document.getElementById('edit_nombreUsuario').value = username;
+        document.getElementById('edit_correo').value = email;
+        document.getElementById('edit_rol').value = role;
+
+        document.getElementById('editUserModal').classList.add('open');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editUserModal').classList.remove('open');
+    }
+
+    function openCreateVehicleModal() {
+        document.getElementById('createVehicleModal').classList.add('open');
+    }
+
+    function closeCreateVehicleModal() {
+        document.getElementById('createVehicleModal').classList.remove('open');
+    }
+
+    function openEditVehicleModal(button) {
+        const id = button.getAttribute('data-id');
+        const placa = button.getAttribute('data-placa');
+        const modelo = button.getAttribute('data-modelo');
+        const estado = button.getAttribute('data-estado');
+
+        document.getElementById('edit_idVehiculo').value = id;
+        document.getElementById('edit_vehPlaca').value = placa;
+        document.getElementById('edit_vehModelo').value = modelo;
+        document.getElementById('edit_vehEstado').value = estado;
+
+        document.getElementById('editVehicleModal').classList.add('open');
+    }
+
+    function closeEditVehicleModal() {
+        document.getElementById('editVehicleModal').classList.remove('open');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Reservas Mensuales (S/)',
+                    data: [1200, 1900, 3000, 2500, 4200, 5600],
+                    borderColor: '#0f172a',
+                    backgroundColor: 'rgba(15, 23, 42, 0.05)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: true, position: 'top' }
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>
