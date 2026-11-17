@@ -1,0 +1,883 @@
+@if (page() === 'inicio') {
+<header class="public-header">
+  <button class="brand" (click)="home()" aria-label="Inicio InstrucciónFácil">
+    <img
+      src="assets/logo.png"
+      alt="InstrucciónFácil, clases de manejo personalizadas"
+    />
+  </button>
+  <nav aria-label="Principal">
+    <a href="#clases">Nuestras clases</a
+    ><a href="#como">Cómo funciona</a>@if(user()){<button
+      class="btn dark"
+      (click)="go(isAdmin()?'resumen':'misclases')"
+    >
+      Mi espacio ↗</button
+    >}@else{<button class="text-btn" (click)="authMode.set('ingreso')">
+      Ingresar</button
+    ><button class="btn dark" (click)="go('reservar')">
+      Reservar una clase ↗</button
+    >}
+  </nav>
+</header>
+<main>
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow"
+        ><span class="dot"></span> CLASES DE MANEJO PERSONALIZADAS</span
+      >
+      <h1>Tu confianza<br />al volante<br /><em>empieza aquí.</em></h1>
+      <p>
+        Aprende a tu ritmo. Elige tu clase, encuentra el horario ideal y da el
+        siguiente paso con InstrucciónFácil.
+      </p>
+      <div class="hero-actions">
+        <button class="btn yellow" (click)="go('reservar')">
+          Quiero aprender a manejar <span>↗</span></button
+        ><a href="#como" class="light-link">Conoce el proceso ↓</a>
+      </div>
+      <div class="hero-notes">
+        <span>✓ Atención personalizada</span
+        ><span>✓ Con tu auto o el nuestro</span>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="art-grid"></div>
+      <div class="road"><i></i></div>
+      <div class="steering"><span></span><b>i</b></div>
+      <div class="art-caption">
+        <span>EL SIGUIENTE PASO</span><strong>Lo manejas tú.</strong>
+      </div>
+      <div class="route-tag">TU CAMINO, A TU RITMO <span>↗</span></div>
+    </div>
+  </section>
+  <section class="promise-strip">
+    <span>01 <b>Elige tu clase</b></span
+    ><span>02 <b>Reserva tu horario</b></span
+    ><span>03 <b>Comienza a conducir</b></span
+    ><span class="strip-end">MÁS CONFIANZA. MÁS LIBERTAD.</span>
+  </section>
+  <section id="clases" class="public-section">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">TU APRENDIZAJE, A TU MEDIDA</span>
+        <h2>Encuentra tu próxima clase.</h2>
+      </div>
+      <p>
+        Horarios y tarifas actualizados<br />directamente por nuestra escuela.
+      </p>
+    </div>
+    <div class="service-grid">
+      @for(s of catalog()['services'];track s.id){
+      <article class="service-card">
+        <span class="class-icon">↗</span>
+        <h3>{{s.name}}</h3>
+        <p>
+          {{s.description || 'Una clase personalizada para avanzar con seguridad
+          al volante.'}}
+        </p>
+        <div class="service-price">
+          <strong>{{money(s.price)}}</strong><span>{{s.duration}} minutos</span>
+        </div>
+        <button
+          class="btn dark"
+          (click)="query['serviceId']=s.id;go('reservar')"
+        >
+          Elegir esta clase ↗
+        </button>
+      </article>
+      }@empty{
+      <article class="empty catalog-empty">
+        <span class="empty-icon">↗</span>
+        <h3>Estamos preparando tu camino.</h3>
+        <p>
+          Pronto encontrarás aquí las clases y tarifas publicadas por la
+          escuela.
+        </p>
+        @if(isAdmin()){<button class="btn dark" (click)="go('clases')">
+          Configurar clases</button
+        >}
+      </article>
+      }
+    </div>
+  </section>
+  <section id="como" class="how-section">
+    <div>
+      <span class="eyebrow">SIN COMPLICACIONES</span>
+      <h2>Menos vueltas.<br />Más camino.</h2>
+      <p>Todo lo que necesitas para organizar tus clases, en un mismo lugar.</p>
+    </div>
+    <div class="steps">
+      <article>
+        <span>01</span>
+        <div>
+          <h3>Elige cuándo aprender</h3>
+          <p>
+            Consulta la disponibilidad y selecciona tu instructor y horario.
+          </p>
+        </div>
+      </article>
+      <article>
+        <span>02</span>
+        <div>
+          <h3>Envía tu comprobante</h3>
+          <p>
+            Encuentra los datos de pago en tu reserva. Nuestro equipo lo
+            revisará.
+          </p>
+        </div>
+      </article>
+      <article>
+        <span>03</span>
+        <div>
+          <h3>Prepárate para tu clase</h3>
+          <p>Consulta el estado y los detalles desde tu espacio personal.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+</main>
+<footer class="public-footer">
+  <strong>Instrucción<span>Fácil</span></strong>
+  <p>Clases de manejo personalizadas · Perú</p>
+  @if(catalog()['settings']['schoolPhone']){<a
+    [href]="whatsapp()"
+    target="_blank"
+    rel="noopener"
+    >Conversemos por WhatsApp ↗</a
+  >}
+</footer>
+} @else {
+<div class="app-shell">
+  <aside class="sidebar">
+    <button class="sidebar-brand" (click)="home()">
+      <img src="assets/logo.png" alt="InstrucciónFácil" /></button
+    ><span class="nav-label"
+      >{{isAdmin()?'ADMINISTRACIÓN':'MI APRENDIZAJE'}}</span
+    >
+    <nav aria-label="Panel">
+      @if(isAdmin()){@for(item of [['resumen','◫','Vista
+      general'],['reservas','▦','Agenda de
+      clases'],['pagos','▣','Pagos'],['clases','↗','Clases y
+      tarifas'],['instructores','♙','Instructores'],['flota','◇','Flota'],['horarios','◷','Horarios'],['configuracion','⚙','Configuración'],['auditoria','≡','Auditoría']];track
+      item[0]){<button [class.active]="page()===item[0]" (click)="go(item[0])">
+        <span>{{item[1]}}</span>{{item[2]}}</button
+      >}}@else{<button
+        [class.active]="page()==='reservar'"
+        (click)="go('reservar')"
+      >
+        <span>↗</span>Reservar una clase</button
+      >@if(user()){<button
+        [class.active]="page()==='misclases'"
+        (click)="go('misclases')"
+      >
+        <span>▦</span>Mis clases</button
+      >}}
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="support-card">
+        <b>¿Necesitas ayuda?</b>
+        <p>Estamos para acompañarte.</p>
+        @if(catalog()['settings']['schoolPhone']){<a
+          [href]="whatsapp()"
+          target="_blank"
+          rel="noopener"
+          >Abrir WhatsApp ↗</a
+        >}@else{<span>Consulta con la escuela</span>}
+      </div>
+      @if(user()){
+      <div class="profile">
+        <span class="avatar">{{user()?.['name']?.charAt(0)}}</span>
+        <div>
+          <b>{{user()?.['name']}}</b
+          ><small>{{isAdmin()?'Administrador':'Alumno'}}</small>
+        </div>
+        <button (click)="logout()" aria-label="Cerrar sesión">↪</button>
+      </div>
+      }@else{<button class="btn dark full" (click)="authMode.set('ingreso')">
+        Ingresar a mi cuenta</button
+      >}
+    </div>
+  </aside>
+  <main class="workspace">
+    <header class="workspace-header">
+      <div>
+        <span class="eyebrow"
+          >INSTRUCCIÓNFÁCIL / {{isAdmin()?'PANEL ADMINISTRATIVO':'TU
+          ESPACIO'}}</span
+        >
+        <h1>{{titles[page()]}}</h1>
+      </div>
+      <div class="header-right">
+        <span class="peru-time">PERÚ · UTC−5</span
+        ><button
+          class="round-btn"
+          (click)="home()"
+          aria-label="Volver al inicio"
+        >
+          ↗
+        </button>
+      </div>
+    </header>
+    @if(page()==='resumen'){
+    <section class="welcome-panel">
+      <div>
+        <span class="eyebrow">TODO LISTO PARA UN NUEVO CAMINO</span>
+        <h2>Tu escuela, en movimiento.</h2>
+        <p>Organiza las clases, revisa los pagos y acompaña cada avance.</p>
+      </div>
+      <button class="btn yellow" (click)="go('clases')">
+        Gestionar clases ↗
+      </button>
+    </section>
+    <section class="stats">
+      <article>
+        <span>Clases registradas</span><strong>{{bookings().length}}</strong
+        ><small>Historial de reservas</small>
+      </article>
+      <article>
+        <span>Por revisar</span><strong>{{pending().length}}</strong
+        ><small>Comprobantes pendientes</small>
+      </article>
+      <article>
+        <span>Ingresos aprobados</span><strong>{{money(income())}}</strong
+        ><small>Pagos validados · total histórico</small>
+      </article>
+    </section>
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">UN VISTAZO A TU AGENDA</span>
+        <h2>Últimas reservas</h2>
+      </div>
+      <button class="text-btn" (click)="go('reservas')">Ver todas ↗</button>
+    </div>
+    } @if(['resumen','reservas','misclases'].includes(page())){
+    <section class="panel">
+      @if(!isAdmin()){
+      <div class="panel-heading">
+        <h2>Tus próximos pasos</h2>
+        <button class="btn yellow" (click)="go('reservar')">
+          Nueva reserva +
+        </button>
+      </div>
+      }
+      <div class="booking-list">
+        @for(b of (page()==='resumen'?bookings().slice(0,5):bookings());track
+        b.id){
+        <article class="booking-card">
+          <div class="date-mark">
+            <span>CLASE</span><b>{{time(b['start'])}}</b>
+          </div>
+          <div class="booking-info">
+            <h3>{{b['serviceName']}}</h3>
+            <p>{{date(b['start'])}}</p>
+            @if(isAdmin()){<small>{{b['clientName']}}</small>}<span
+              class="badge"
+              [class]="'badge '+badge(b['status'])"
+              >{{b['status']}}</span
+            >@if(b['status']==='Pendiente de Pago'){<small
+              >Reserva hasta {{time(b['expires'])}}</small
+            >}@if(b['adjustmentRequested']){<small
+              >Ajuste solicitado: {{b['adjustmentRequested']}}</small
+            >}
+          </div>
+          <div class="booking-actions">
+            <strong>{{money(b['price'])}}</strong>@if(b['status']==='Pendiente
+            de Pago' && !isAdmin()){<button
+              class="btn dark small"
+              (click)="receipt=b;operation='';file=null"
+            >
+              Adjuntar pago</button
+            >}@if(['Pendiente de
+            Pago','Confirmada'].includes(b['status'])){<button
+              class="text-btn danger"
+              (click)="cancel(b)"
+            >
+              Cancelar</button
+            >}
+          </div>
+        </article>
+        }@empty{
+        <div class="empty">
+          <span class="empty-icon">▦</span>
+          <h3>Un camino por comenzar.</h3>
+          <p>
+            {{isAdmin()?'Las reservas aparecerán aquí cuando tus alumnos elijan
+            una clase.':'Cuando reserves una clase, podrás consultar aquí todos
+            los detalles.'}}
+          </p>
+          <button
+            class="btn yellow"
+            (click)="go(isAdmin()?'clases':'reservar')"
+          >
+            {{isAdmin()?'Configurar mi escuela':'Encontrar una clase'}} ↗
+          </button>
+        </div>
+        }
+      </div>
+    </section>
+    @if(!isAdmin()&&payments().length){
+    <section class="panel">
+      <h2>Historial de pagos</h2>
+      @for(p of payments();track p.id){
+      <div class="list-row">
+        <span>{{p['operation']}}</span><b>{{money(p['amount'])}}</b
+        ><span [class]="'badge '+badge(p['status'])">{{p['status']}}</span
+        ><small>{{p['reason']}}</small>
+      </div>
+      }
+    </section>
+    }} @if(resourceKind[page()]){
+    <div class="management-grid">
+      <section class="panel">
+        <div class="panel-heading">
+          <h2>{{titles[page()]}}</h2>
+          <span class="count">{{resources().length}}</span>
+        </div>
+        @for(r of resources();track r.id){
+        <article class="resource-row">
+          <div>
+            <h3>
+              {{r['name']||r['plate']||(days[r['day']]+' ·
+              '+instructorName(r['instructorId']))}}
+            </h3>
+            <p>
+              @if(page()==='clases'){ {{r['duration']}} min ·
+              {{money(r['price'])}} }@else if(page()==='horarios'){
+              {{r['start']}} – {{r['end']}} }@else{ {{r['model']||r['license']}}
+              }
+            </p>
+            <span [class]="'badge '+(r['active']?'success':'muted')"
+              >{{r['active']?(r['state']||'Activo'):'Inactivo'}}</span
+            >
+          </div>
+          <button class="text-btn" (click)="edit(r)">Editar ↗</button>
+        </article>
+        }@empty{
+        <div class="empty compact">
+          <span class="empty-icon">＋</span>
+          <h3>Aún no hay registros.</h3>
+          <p>Agrega el primero usando el formulario.</p>
+        </div>
+        }
+      </section>
+      <form class="panel editor" id="resource-form" (ngSubmit)="saveResource()">
+        <span class="eyebrow">CONFIGURA TU ESCUELA</span>
+        <h2>{{editId?'Editar registro':'Nuevo registro'}}</h2>
+        @if(page()==='clases'){<label
+          >Nombre de la clase<input
+            name="name"
+            [(ngModel)]="form['name']"
+            required
+            placeholder="Ej. Manejo urbano" /></label
+        ><label
+          >Descripción<textarea
+            name="description"
+            [(ngModel)]="form['description']"
+            rows="3"
+            placeholder="¿Qué aprenderá el alumno?"
+          ></textarea>
+        </label>
+        <div class="form-row">
+          <label
+            >Duración (min)<input
+              name="duration"
+              type="number"
+              [(ngModel)]="form['duration']"
+              min="15"
+              max="480"
+              required /></label
+          ><label
+            >Tarifa (S/)<input
+              name="price"
+              type="number"
+              [(ngModel)]="form['price']"
+              min="0.01"
+              step="0.01"
+              required
+              placeholder="0.00"
+          /></label>
+        </div>
+        }@else if(page()==='instructores'){<label
+          >Nombre completo<input
+            name="name"
+            [(ngModel)]="form['name']"
+            required /></label
+        ><label
+          >Licencia<input
+            name="license"
+            [(ngModel)]="form['license']"
+            required /></label
+        ><label
+          >Teléfono<input
+            name="phone"
+            [(ngModel)]="form['phone']"
+            type="tel" /></label
+        >}@else if(page()==='flota'){<label
+          >Placa<input
+            name="plate"
+            [(ngModel)]="form['plate']"
+            required /></label
+        ><label
+          >Marca y modelo<input
+            name="model"
+            [(ngModel)]="form['model']"
+            required /></label
+        ><label
+          >Estado<select name="state" [(ngModel)]="form['state']">
+            <option>Disponible</option>
+            <option>En mantenimiento</option>
+            <option>Inactivo</option>
+          </select></label
+        >}@else{<label
+          >Instructor<select
+            name="instructorId"
+            [(ngModel)]="form['instructorId']"
+            required
+          >
+            <option value="">Seleccionar</option>
+            @for(i of instructors();track i.id){
+            <option [value]="i.id">{{i['name']}}</option>
+            }
+          </select></label
+        ><label
+          >Día de la semana<select name="day" [(ngModel)]="form['day']">
+            @for(d of days;track d;let idx=$index){
+            <option [ngValue]="idx">{{d}}</option>
+            }
+          </select></label
+        >
+        <div class="form-row">
+          <label
+            >Desde<input
+              name="start"
+              type="time"
+              [(ngModel)]="form['start']"
+              required /></label
+          ><label
+            >Hasta<input
+              name="end"
+              type="time"
+              [(ngModel)]="form['end']"
+              required
+          /></label>
+        </div>
+        }<label class="checkbox"
+          ><input
+            type="checkbox"
+            name="active"
+            [(ngModel)]="form['active']"
+          />Activo y disponible para uso</label
+        ><button class="btn dark full" type="submit" [disabled]="busy()">
+          Guardar {{editId?'cambios':'registro'}} ↗
+        </button>
+      </form>
+    </div>
+    } @if(page()==='configuracion'){
+    <form (ngSubmit)="saveSettings()" class="settings-grid">
+      <section class="panel">
+        <span class="eyebrow">RECIBE LOS PAGOS DE TUS ALUMNOS</span>
+        <h2>Tu cuenta de Yape</h2>
+        <p class="subtle">
+          Los alumnos verán estos datos al reservar. Nunca solicitaremos tu
+          contraseña de Yape.
+        </p>
+        <label
+          >Número de celular<input
+            name="yapeNumber"
+            type="tel"
+            [(ngModel)]="settings['yapeNumber']"
+            maxlength="9"
+            placeholder="9 dígitos" /></label
+        ><label
+          >Nombre del titular<input
+            name="yapeHolder"
+            [(ngModel)]="settings['yapeHolder']"
+            placeholder="Como aparece en Yape" /></label
+        ><label class="checkbox"
+          ><input
+            name="yapeEnabled"
+            type="checkbox"
+            [(ngModel)]="settings['yapeEnabled']"
+          />Habilitar Yape para reservas</label
+        >
+        <hr />
+        <h2>Contacto de la escuela</h2>
+        <label
+          >WhatsApp<input
+            name="schoolPhone"
+            type="tel"
+            [(ngModel)]="settings['schoolPhone']"
+            placeholder="51 seguido de 9 dígitos"
+        /></label>
+        <div class="notice">
+          WhatsApp funciona mediante enlace al chat. El envío automático estará
+          disponible al integrar la API.
+        </div>
+      </section>
+      <section class="panel">
+        <span class="eyebrow">CONDICIONES CLARAS PARA TODOS</span>
+        <h2>Políticas de reserva</h2>
+        <label
+          >Bloqueo de reserva (minutos)<input
+            name="holdMinutes"
+            type="number"
+            [(ngModel)]="settings['holdMinutes']"
+            min="1"
+            required /></label
+        ><label
+          >Prórroga única por revisión (minutos)<input
+            name="reviewMinutes"
+            type="number"
+            [(ngModel)]="settings['reviewMinutes']"
+            min="1"
+            required /></label
+        ><label
+          >Anticipación para reservar (horas)<input
+            name="minBookingHours"
+            type="number"
+            [(ngModel)]="settings['minBookingHours']"
+            min="1"
+            required
+        /></label>
+        <div class="form-row">
+          <label
+            >Reprogramar (horas)<input
+              name="rescheduleHours"
+              type="number"
+              [(ngModel)]="settings['rescheduleHours']"
+              min="1"
+              required /></label
+          ><label
+            >Cancelar (horas)<input
+              name="cancelHours"
+              type="number"
+              [(ngModel)]="settings['cancelHours']"
+              min="1"
+              required
+          /></label>
+        </div>
+        <label
+          >Tolerancia de llegada (minutos)<input
+            name="arrivalMinutes"
+            type="number"
+            [(ngModel)]="settings['arrivalMinutes']"
+            min="1"
+            required /></label
+        ><button class="btn yellow full" type="submit" [disabled]="busy()">
+          Guardar configuración ↗
+        </button>
+      </section>
+    </form>
+    } @if(page()==='pagos'){
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Comprobantes de pago</h2>
+          <p class="subtle">
+            Revisa la evidencia antes de confirmar una clase.
+          </p>
+        </div>
+        <span class="badge warning">{{pending().length}} pendientes</span>
+      </div>
+      @for(p of payments();track p.id){
+      <article class="payment-row">
+        <span class="payment-icon">S/</span>
+        <div>
+          <h3>{{p['clientName']}}</h3>
+          <p>Operación {{p['operation']}}</p>
+          <span [class]="'badge '+badge(p['status'])">{{p['status']}}</span
+          >@if(p['late']){<small
+            >Pago tardío: requiere resolver incidencia</small
+          >}
+        </div>
+        <strong>{{money(p['amount'])}}</strong>
+        <div class="payment-actions">
+          <a class="text-btn" [href]="'/api/payments/'+p.id+'/file'"
+            >Ver comprobante ↗</a
+          >@if(p['status']==='Pendiente'){<button
+            class="btn dark small"
+            (click)="validate(p,true)"
+            [disabled]="busy()||p['late']"
+          >
+            Aprobar</button
+          ><button
+            class="text-btn danger"
+            (click)="validate(p,false)"
+            [disabled]="busy()"
+          >
+            Rechazar</button
+          >}
+        </div>
+      </article>
+      }@empty{
+      <div class="empty">
+        <span class="empty-icon">✓</span>
+        <h3>No hay comprobantes para revisar.</h3>
+        <p>Los pagos enviados por tus alumnos aparecerán aquí.</p>
+      </div>
+      }
+    </section>
+    } @if(page()==='reservar'){
+    <div class="booking-layout">
+      <section class="panel">
+        <span class="eyebrow">01 / ENCUENTRA TU HORARIO</span>
+        <h2>Un paso más cerca de conducir.</h2>
+        <form (ngSubmit)="findSlots()">
+          <label
+            >¿Qué clase quieres tomar?<select
+              name="serviceId"
+              [(ngModel)]="query['serviceId']"
+              required
+            >
+              <option value="">Selecciona una clase</option>
+              @for(s of catalog()['services'];track s.id){
+              <option [value]="s.id">
+                {{s.name}} · {{s.duration}} min · {{money(s.price)}}
+              </option>
+              }
+            </select></label
+          ><label
+            >Fecha<input
+              type="date"
+              name="date"
+              [(ngModel)]="query['date']"
+              required /></label
+          ><label
+            >Vehículo<select
+              name="ownVehicle"
+              [(ngModel)]="query['ownVehicle']"
+            >
+              <option [ngValue]="true">Usaré mi propio vehículo</option>
+              <option [ngValue]="false">
+                Necesito un vehículo de la escuela
+              </option>
+            </select></label
+          ><button
+            class="btn dark full"
+            [disabled]="busy()||!catalog()['services'].length"
+          >
+            Consultar disponibilidad ↗
+          </button>
+        </form>
+        @if(!catalog()['services'].length){
+        <div class="notice">
+          La escuela aún no ha publicado clases. Vuelve pronto para consultar
+          los horarios.
+        </div>
+        }
+        <div class="slots">
+          @for(s of slots();track s.start+s.instructorId){<button
+            [class.selected]="selected()===s"
+            (click)="selected.set(s)"
+          >
+            <b>{{time(s.start)}}</b><span>{{s.instructorName}}</span></button
+          >}
+        </div>
+        @if(slots().length===0&&query['serviceId']){
+        <p class="subtle">
+          Consulta otra fecha si no encuentras horarios disponibles.
+        </p>
+        }
+      </section>
+      <section class="panel booking-summary">
+        <span class="eyebrow">02 / REVISA Y RESERVA</span>
+        <h2>Tu próxima clase.</h2>
+        @if(selected();as sel){
+        <div class="summary-time">
+          {{time(sel['start'])}}<span>{{sel['instructorName']}}</span>
+        </div>
+        <p>{{date(sel['start'])}}</p>
+        @if(query['ownVehicle']){<label
+          >Placa<input
+            [(ngModel)]="query['ownPlate']"
+            placeholder="ABC-123" /></label
+        ><label
+          >Marca y modelo<input
+            [(ngModel)]="query['ownModel']"
+            placeholder="Marca y modelo" /></label
+        ><label
+          >Transmisión<select [(ngModel)]="query['ownTransmission']">
+            <option>Mecánica</option>
+            <option>Automática</option>
+          </select></label
+        >}
+        <div class="notice">
+          <b>Antes de reservar</b>
+          <p>
+            El horario se bloquea {{catalog()['settings']['holdMinutes']}}
+            minutos. El pago se confirma tras revisión. Adjuntar evidencia a
+            tiempo permite una única prórroga de hasta
+            {{catalog()['settings']['reviewMinutes']}} minutos.
+          </p>
+          <p>
+            Reprogramación con {{catalog()['settings']['rescheduleHours']}}
+            horas de anticipación, sujeta a disponibilidad. Cancelación con
+            {{catalog()['settings']['cancelHours']}} horas: devolución o saldo
+            tras verificar pago. Fuera de plazo: revisión humana, sin pérdida
+            automática.
+          </p>
+        </div>
+        <label class="checkbox"
+          ><input type="checkbox" [(ngModel)]="query['policyAccepted']" />He
+          leído y acepto las condiciones de reserva.</label
+        ><button
+          class="btn yellow full"
+          (click)="reserve()"
+          [disabled]="busy()||!query['policyAccepted']"
+        >
+          {{user()?'Crear mi reserva':'Crear cuenta para reservar'}} ↗</button
+        >}@else{
+        <div class="empty compact">
+          <span class="empty-icon">◷</span>
+          <p>Selecciona una clase y un horario disponible para continuar.</p>
+        </div>
+        }
+      </section>
+    </div>
+    } @if(page()==='auditoria'){
+    <section class="panel">
+      <h2>Registro de acciones</h2>
+      @for(a of audit();track a.id){
+      <div class="audit-row">
+        <span class="audit-dot"></span>
+        <div>
+          <b>{{a['action']}}</b>
+          <p>{{date(a['at'])}}</p>
+          <small>Actor: {{a['actor']}}</small>
+        </div>
+      </div>
+      }@empty{
+      <div class="empty"><p>No hay acciones registradas.</p></div>
+      }
+    </section>
+    }
+    <footer class="workspace-footer">
+      <span>InstrucciónFácil · Cada paso cuenta.</span
+      ><span>Clases de manejo personalizadas</span>
+    </footer>
+  </main>
+</div>
+} @if(!online()){
+<div class="connection-banner" role="alert">
+  No se pudo conectar con el servidor. Inicia la API para usar cuentas y
+  reservas.<button (click)="init()">Reintentar</button>
+</div>
+} @if(error()){
+<div class="toast error" role="alert">
+  <span>{{error()}}</span
+  ><button (click)="error.set('')" aria-label="Cerrar error">×</button>
+</div>
+} @if(message()){
+<div class="toast success" role="status">
+  <span>{{message()}}</span
+  ><button (click)="message.set('')" aria-label="Cerrar aviso">×</button>
+</div>
+} @if(busy()){
+<div class="progress" role="status" aria-label="Procesando"></div>
+} @if(authMode()){
+<div class="modal-backdrop">
+  <section
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="auth-title"
+  >
+    <button class="close" (click)="authMode.set('')" aria-label="Cerrar">
+      ×</button
+    ><span class="eyebrow">BIENVENIDO A INSTRUCCIÓNFÁCIL</span>
+    <h2 id="auth-title">
+      {{authMode()==='registro'?'Tu camino comienza aquí.':'Qué bueno verte de
+      nuevo.'}}
+    </h2>
+    <p class="subtle">
+      {{authMode()==='registro'?'Crea tu cuenta y organiza tus clases.':'Ingresa
+      para continuar con tu aprendizaje.'}}
+    </p>
+    <form (ngSubmit)="authenticate()">
+      @if(authMode()==='registro'){<label
+        >Nombre completo<input
+          name="name"
+          [(ngModel)]="credentials['name']"
+          required
+          autocomplete="name" /></label
+      >}<label
+        >Correo electrónico<input
+          name="email"
+          [(ngModel)]="credentials['email']"
+          type="email"
+          required
+          autocomplete="email" /></label
+      ><label
+        >Contraseña<input
+          name="password"
+          [(ngModel)]="credentials['password']"
+          type="password"
+          required
+          [minlength]="authMode()==='registro'?10:1"
+          [autocomplete]="authMode()==='registro'?'new-password':'current-password'" /></label
+      >@if(authMode()==='registro'){
+      <p class="subtle">Usa entre 10 y 72 caracteres.</p>
+      <label class="checkbox"
+        ><input
+          name="consent"
+          type="checkbox"
+          [(ngModel)]="credentials['consent']"
+          required
+        />Acepto que la escuela utilice mis datos para gestionar mi cuenta,
+        clases y pagos.</label
+      >}<button class="btn yellow full" type="submit" [disabled]="busy()">
+        {{authMode()==='registro'?'Crear mi cuenta':'Ingresar'}} ↗
+      </button>
+    </form>
+    <button
+      class="text-btn auth-switch"
+      (click)="authMode.set(authMode()==='registro'?'ingreso':'registro')"
+    >
+      {{authMode()==='registro'?'Ya tengo una cuenta':'Quiero crear una
+      cuenta'}}
+    </button>
+  </section>
+</div>
+} @if(receipt){
+<div class="modal-backdrop">
+  <section
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="receipt-title"
+  >
+    <button class="close" (click)="receipt=null" aria-label="Cerrar">×</button
+    ><span class="eyebrow">TU COMPROBANTE</span>
+    <h2 id="receipt-title">Un paso para confirmar.</h2>
+    <div class="yape-card">
+      <span>YAPE</span
+      ><strong>{{receipt['paymentInstructions']['number']}}</strong>
+      <p>{{receipt['paymentInstructions']['holder']}}</p>
+      <b>{{money(receipt['price'])}}</b>
+    </div>
+    <form (ngSubmit)="upload()">
+      <label
+        >Número de operación<input
+          name="operation"
+          [(ngModel)]="operation"
+          required
+          minlength="4" /></label
+      ><label
+        >Comprobante de pago<input
+          name="file"
+          type="file"
+          accept="image/png,image/jpeg,application/pdf"
+          (change)="chooseFile($event)"
+          required
+      /></label>
+      <p class="subtle">
+        JPG, PNG o PDF · Máximo 5 MB. Sujeto a validación por la escuela.
+      </p>
+      <button class="btn yellow full" [disabled]="busy()||!file">
+        Enviar comprobante ↗
+      </button>
+    </form>
+  </section>
+</div>
+}
